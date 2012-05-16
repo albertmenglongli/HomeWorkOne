@@ -1,0 +1,72 @@
+<project name="lmlHomework" default="test" basedir=".">
+    <property name="src" value="src"/>
+    <property name="build" value="build"/>
+    <property name="lib" value="lib" />
+    <property name="dist" value="dist"/>
+    <property name="mainclass" value="CheckStand"/>
+    <property name="classpath" location="${build}"/>
+    <path id="classpath.run">
+              <pathelement path="${classpath}"/>
+              <fileset dir="${lib}">
+                     <include name="*.jar"/>
+              </fileset>
+    </path>
+    <path id="classpath.test">
+              <path refid="classpath.run"/>
+              <path location="${dist}/lib/test-${DSTAMP}.jar"/>
+    </path>
+    
+    <target name="init" >
+              <tstamp/>
+              <delete dir="${build}"/>
+              <delete dir="${report}"/>
+              <delete dir="${dist}"/>
+              <mkdir dir="${build}"/>
+    </target>
+
+
+    <target name="compile" depends="init">
+	<javac srcdir="${src}" destdir="${build}">
+              <classpath refid="classpath.run" />
+              </javac>
+    </target>
+
+    <target name="dist" depends="compile">
+              <mkdir dir="${dist}/lib"/>
+              <jar jarfile="${dist}/lib/test-${DSTAMP}.jar" basedir="${build}"/>
+    </target>
+
+    <target name="jar" depends="compile,dist">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/${mainclass}.jar" basedir="build">
+            <manifest>
+                <attribute name="Main-Class" value="${mainclass}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="build/jar/${mainclass}.jar" fork="true"/>
+    </target>
+
+    <target name="test" depends="compile, dist">
+              <mkdir dir="${report.xml}"/>
+              <mkdir dir="${report.html}"/>
+              <junit printsummary="yes" haltonfailure="no">
+                     <classpath refid="classpath.run"/>
+                     <formatter type="xml"/>
+                     <batchtest fork="yes" todir="${report.xml}">
+                            <fileset dir="${src}" includes="**/Test*.java"/>
+                     </batchtest>
+              </junit>
+              <junitreport todir="${report.html}">
+                     <fileset dir="${report.xml}">
+                            <include name="*.xml"/>
+                     </fileset>
+                     <report format="frames" todir="${report.html}"/>
+              </junitreport>
+       </target>
+    
+
+</project>
+
